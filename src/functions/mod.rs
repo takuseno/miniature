@@ -1,2 +1,9 @@
 pub mod add;
+pub mod broadcast;
+pub mod div;
+pub mod matmul;
+pub mod mean;
 pub mod mul;
+pub mod relu;
+pub mod square;
+pub mod sub;

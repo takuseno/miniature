@@ -6,9 +6,9 @@ use crate::function::FunctionImpl;
 use crate::variable::Variable;
 
 #[derive(Debug)]
-pub struct Add {}
+pub struct Sub {}
 
-impl Add {
+impl Sub {
     fn validate(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -26,7 +26,7 @@ impl Add {
     }
 }
 
-impl FunctionImpl for Add {
+impl FunctionImpl for Sub {
     fn forward_impl(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -39,7 +39,7 @@ impl FunctionImpl for Add {
         let mut output = outputs[0].borrow_mut();
 
         for i in 0..x.size() as usize {
-            output.data[i] = x.data[i] + y.data[i];
+            output.data[i] = x.data[i] - y.data[i];
         }
     }
 
@@ -56,18 +56,18 @@ impl FunctionImpl for Add {
 
         for i in 0..x.size() as usize {
             x.grad[i] += output.grad[i];
-            y.grad[i] += output.grad[i];
+            y.grad[i] -= output.grad[i];
         }
     }
 
     fn get_name(&self) -> &str {
-        "Add"
+        "Sub"
     }
 }
 
-pub fn add(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+pub fn sub(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Add {});
+    let function = Box::new(Sub {});
     let cg_function = Rc::new(RefCell::new(CgFunction {
         inputs: vec![x, y],
         outputs: vec![output.clone()],
@@ -84,12 +84,12 @@ mod tests {
     use crate::graph::backward;
 
     #[test]
-    fn add_variables() {
+    fn sub_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
         let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = add(x, y);
+        let h = sub(x, y);
         let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = add(h, z);
+        let output = sub(h, z);
         backward(output);
     }
 }

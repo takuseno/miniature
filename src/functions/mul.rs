@@ -16,9 +16,11 @@ impl Mul {
     ) {
         assert_eq!(inputs.len(), 2);
         assert_eq!(outputs.len(), 1);
+
         let x = inputs[0].borrow();
         let y = inputs[0].borrow();
-        let output = inputs[0].borrow();
+        let output = outputs[0].borrow();
+
         assert_eq!(x.shape, y.shape);
         assert_eq!(x.shape, output.shape);
     }
@@ -53,8 +55,8 @@ impl FunctionImpl for Mul {
         let output = outputs[0].borrow();
 
         for i in 0..x.size() as usize {
-            x.grad[i] = x.data[i] * output.grad[i];
-            y.grad[i] = y.data[i] * output.grad[i];
+            x.grad[i] += y.data[i] * output.grad[i];
+            y.grad[i] += x.data[i] * output.grad[i];
         }
     }
 

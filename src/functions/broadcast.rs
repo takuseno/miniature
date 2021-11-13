@@ -6,27 +6,35 @@ use crate::function::FunctionImpl;
 use crate::variable::Variable;
 
 #[derive(Debug)]
-pub struct Add {}
+pub struct Broadcast {
+    shape: Vec<u32>,
+}
 
-impl Add {
+impl Broadcast {
     fn validate(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
         outputs: &Vec<Rc<RefCell<Variable>>>,
     ) {
-        assert_eq!(inputs.len(), 2);
+        assert_eq!(inputs.len(), 1);
         assert_eq!(outputs.len(), 1);
 
         let x = inputs[0].borrow();
-        let y = inputs[0].borrow();
         let output = outputs[0].borrow();
 
-        assert_eq!(x.shape, y.shape);
-        assert_eq!(x.shape, output.shape);
+        assert_eq!(x.shape.len(), self.shape.len());
+        assert_eq!(output.shape, self.shape);
+        for i in 0..x.shape.len() as usize {
+            if x.shape[i] != 1 {
+                assert_eq!(x.shape[i], self.shape[i]);
+            } else {
+                assert_eq!(x.shape[i], 1);
+            }
+        }
     }
 }
 
-impl FunctionImpl for Add {
+impl FunctionImpl for Broadcast {
     fn forward_impl(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -35,11 +43,14 @@ impl FunctionImpl for Add {
         self.validate(inputs, outputs);
 
         let x = inputs[0].borrow();
-        let y = inputs[1].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.size() as usize {
-            output.data[i] = x.data[i] + y.data[i];
+        // supports only batch dimension
+        for i in 0..output.shape[0] {
+            let offset = (i * x.size()) as usize;
+            for j in 0..x.size() as usize {
+                output.data[j + offset] = x.data[j];
+            }
         }
     }
 
@@ -51,25 +62,27 @@ impl FunctionImpl for Add {
         self.validate(inputs, outputs);
 
         let mut x = inputs[0].borrow_mut();
-        let mut y = inputs[1].borrow_mut();
         let output = outputs[0].borrow();
 
+        // supports only batch dimension
         for i in 0..x.size() as usize {
-            x.grad[i] += output.grad[i];
-            y.grad[i] += output.grad[i];
+            for j in 0..output.shape[0] as usize {
+                let offset = j * x.size() as usize;
+                x.grad[i] += output.grad[i + offset];
+            }
         }
     }
 
     fn get_name(&self) -> &str {
-        "Add"
+        "Broadcast"
     }
 }
 
-pub fn add(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Add {});
+pub fn broadcast(x: Rc<RefCell<Variable>>, shape: Vec<u32>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(shape.clone())));
+    let function = Box::new(Broadcast { shape: shape });
     let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x, y],
+        inputs: vec![x],
         outputs: vec![output.clone()],
         function_impl: function,
     }));
@@ -84,12 +97,9 @@ mod tests {
     use crate::graph::backward;
 
     #[test]
-    fn add_variables() {
+    fn broadcast_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = add(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = add(h, z);
+        let output = broadcast(x, vec![3, 2, 3]);
         backward(output);
     }
 }

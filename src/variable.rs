@@ -62,6 +62,14 @@ impl Variable {
         self.grad.fill(0.0);
     }
 
+    pub fn ones(&mut self) {
+        self.data.fill(1.0);
+    }
+
+    pub fn one_grads(&mut self) {
+        self.grad.fill(1.0);
+    }
+
     pub fn set_parent(&mut self, parent: Rc<RefCell<CgFunction>>) {
         self.parent = Some(parent);
     }

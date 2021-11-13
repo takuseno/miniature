@@ -6,27 +6,23 @@ use crate::function::FunctionImpl;
 use crate::variable::Variable;
 
 #[derive(Debug)]
-pub struct Add {}
+pub struct Mean {}
 
-impl Add {
+impl Mean {
     fn validate(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
         outputs: &Vec<Rc<RefCell<Variable>>>,
     ) {
-        assert_eq!(inputs.len(), 2);
+        assert_eq!(inputs.len(), 1);
         assert_eq!(outputs.len(), 1);
 
-        let x = inputs[0].borrow();
-        let y = inputs[0].borrow();
         let output = outputs[0].borrow();
-
-        assert_eq!(x.shape, y.shape);
-        assert_eq!(x.shape, output.shape);
+        assert_eq!(output.size(), 1);
     }
 }
 
-impl FunctionImpl for Add {
+impl FunctionImpl for Mean {
     fn forward_impl(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -35,12 +31,13 @@ impl FunctionImpl for Add {
         self.validate(inputs, outputs);
 
         let x = inputs[0].borrow();
-        let y = inputs[1].borrow();
         let mut output = outputs[0].borrow_mut();
 
+        let mut sum = 0.0;
         for i in 0..x.size() as usize {
-            output.data[i] = x.data[i] + y.data[i];
+            sum += x.data[i];
         }
+        output.data[0] = sum / x.size() as f32;
     }
 
     fn backward_impl(
@@ -51,25 +48,24 @@ impl FunctionImpl for Add {
         self.validate(inputs, outputs);
 
         let mut x = inputs[0].borrow_mut();
-        let mut y = inputs[1].borrow_mut();
         let output = outputs[0].borrow();
 
-        for i in 0..x.size() as usize {
-            x.grad[i] += output.grad[i];
-            y.grad[i] += output.grad[i];
+        let total_size = x.size();
+        for i in 0..total_size as usize {
+            x.grad[i] += output.grad[0] / total_size as f32;
         }
     }
 
     fn get_name(&self) -> &str {
-        "Add"
+        "Mean"
     }
 }
 
-pub fn add(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Add {});
+pub fn mean(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(vec![1])));
+    let function = Box::new(Mean {});
     let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x, y],
+        inputs: vec![x],
         outputs: vec![output.clone()],
         function_impl: function,
     }));
@@ -84,12 +80,9 @@ mod tests {
     use crate::graph::backward;
 
     #[test]
-    fn add_variables() {
+    fn mean_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = add(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = add(h, z);
+        let output = mean(x);
         backward(output);
     }
 }

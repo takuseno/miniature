@@ -10,6 +10,9 @@ pub fn backward(variable: Rc<RefCell<Variable>>) {
         return;
     }
 
+    // initialize leaf gradient with ones
+    variable.borrow_mut().one_grads();
+
     let mut queue: VecDeque<Rc<RefCell<CgFunction>>> = VecDeque::new();
     queue.push_back(variable.borrow().parent.as_ref().unwrap().clone());
     loop {
