@@ -18,7 +18,7 @@ impl MatMul {
         assert_eq!(outputs.len(), 1);
 
         let x = inputs[0].borrow();
-        let y = inputs[0].borrow();
+        let y = inputs[1].borrow();
         let output = outputs[0].borrow();
 
         // supports only 2-dim tensors
