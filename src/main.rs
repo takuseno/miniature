@@ -1,7 +1,7 @@
-mod variable;
 mod function;
-mod graph;
 mod functions;
+mod graph;
+mod variable;
 
 fn main() {
     println!("Hello, world!");

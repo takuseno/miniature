@@ -1,8 +1,7 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::function::CgFunction;
-
 
 #[derive(Debug)]
 pub struct Variable {
@@ -25,7 +24,12 @@ impl Variable {
         data.resize(size as usize, 0.0);
         grad.resize(size as usize, 0.0);
 
-        Self { parent: None, shape: shape, data: data, grad: grad }
+        Self {
+            parent: None,
+            shape: shape,
+            data: data,
+            grad: grad,
+        }
     }
 
     pub fn size(&self) -> u32 {

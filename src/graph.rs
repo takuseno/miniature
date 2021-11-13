@@ -1,20 +1,20 @@
-use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::rc::Rc;
 
-use crate::variable::Variable;
 use crate::function::CgFunction;
+use crate::variable::Variable;
 
 pub fn backward(variable: Rc<RefCell<Variable>>) {
     if variable.borrow().parent.is_none() {
-        return
+        return;
     }
 
     let mut queue: VecDeque<Rc<RefCell<CgFunction>>> = VecDeque::new();
     queue.push_back(variable.borrow().parent.as_ref().unwrap().clone());
     loop {
         if queue.is_empty() {
-            break
+            break;
         }
         let function = queue.pop_front().unwrap();
 

@@ -1,15 +1,19 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
-use crate::variable::Variable;
-use crate::function::FunctionImpl;
 use crate::function::CgFunction;
+use crate::function::FunctionImpl;
+use crate::variable::Variable;
 
 #[derive(Debug)]
 pub struct Mul {}
 
 impl Mul {
-    fn validate(&mut self, inputs: &Vec<Rc<RefCell<Variable>>>, outputs: &Vec<Rc<RefCell<Variable>>>) {
+    fn validate(
+        &mut self,
+        inputs: &Vec<Rc<RefCell<Variable>>>,
+        outputs: &Vec<Rc<RefCell<Variable>>>,
+    ) {
         assert_eq!(inputs.len(), 2);
         assert_eq!(outputs.len(), 1);
         let x = inputs[0].borrow();
@@ -21,7 +25,11 @@ impl Mul {
 }
 
 impl FunctionImpl for Mul {
-    fn forward_impl(&mut self, inputs: &Vec<Rc<RefCell<Variable>>>, outputs: &Vec<Rc<RefCell<Variable>>>) {
+    fn forward_impl(
+        &mut self,
+        inputs: &Vec<Rc<RefCell<Variable>>>,
+        outputs: &Vec<Rc<RefCell<Variable>>>,
+    ) {
         self.validate(inputs, outputs);
 
         let x = inputs[0].borrow();
@@ -33,7 +41,11 @@ impl FunctionImpl for Mul {
         }
     }
 
-    fn backward_impl(&mut self, inputs: &Vec<Rc<RefCell<Variable>>>, outputs: &Vec<Rc<RefCell<Variable>>>) {
+    fn backward_impl(
+        &mut self,
+        inputs: &Vec<Rc<RefCell<Variable>>>,
+        outputs: &Vec<Rc<RefCell<Variable>>>,
+    ) {
         self.validate(&inputs, &outputs);
 
         let mut x = inputs[0].borrow_mut();
@@ -57,7 +69,7 @@ pub fn mul(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
     let cg_function = Rc::new(RefCell::new(CgFunction {
         inputs: vec![x, y],
         outputs: vec![output.clone()],
-        function_impl: function
+        function_impl: function,
     }));
     cg_function.borrow_mut().forward();
     output.borrow_mut().set_parent(cg_function);

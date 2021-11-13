@@ -1,11 +1,19 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::variable::Variable;
 
 pub trait FunctionImpl {
-    fn forward_impl(&mut self, inputs: &Vec<Rc<RefCell<Variable>>>, outputs: &Vec<Rc<RefCell<Variable>>>);
-    fn backward_impl(&mut self, inputs: &Vec<Rc<RefCell<Variable>>>, outputs: &Vec<Rc<RefCell<Variable>>>);
+    fn forward_impl(
+        &mut self,
+        inputs: &Vec<Rc<RefCell<Variable>>>,
+        outputs: &Vec<Rc<RefCell<Variable>>>,
+    );
+    fn backward_impl(
+        &mut self,
+        inputs: &Vec<Rc<RefCell<Variable>>>,
+        outputs: &Vec<Rc<RefCell<Variable>>>,
+    );
     fn get_name(&self) -> &str;
 }
 
@@ -28,6 +36,7 @@ impl CgFunction {
     }
 
     pub fn backward(&mut self) {
-        self.function_impl.backward_impl(&self.inputs, &self.outputs);
+        self.function_impl
+            .backward_impl(&self.inputs, &self.outputs);
     }
 }
