@@ -6,15 +6,6 @@ use std::rc::Rc;
 
 use crate::variable::Variable;
 
-pub struct MNISTLoader {
-    train_images: Vec<Vec<f32>>,
-    train_labels: Vec<i32>,
-    test_images: Vec<Vec<f32>>,
-    test_labels: Vec<i32>,
-    train_size: i32,
-    test_size: i32,
-}
-
 const MNIST_NUM_CLASSES: u32 = 10;
 const MNIST_IMAGE_SIZE: u32 = 28 * 28;
 const MNIST_TRAIN_IMAGE_FILE: &str = "mnist-train-images";
@@ -84,6 +75,15 @@ fn load_mnist_label_file(path: &str) -> Result<Vec<i32>, Box<dyn std::error::Err
     Ok(labels)
 }
 
+pub struct MNISTLoader {
+    train_images: Vec<Vec<f32>>,
+    train_labels: Vec<i32>,
+    test_images: Vec<Vec<f32>>,
+    test_labels: Vec<i32>,
+    train_size: i32,
+    test_size: i32,
+}
+
 impl MNISTLoader {
     pub fn new(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let base_dir = String::from(path);
@@ -123,15 +123,15 @@ impl MNISTLoader {
 
         let mut rng = rand::thread_rng();
         for i in 0..batch_size as usize {
-            let index = rng.gen_range(0, self.train_size);
+            let index = rng.gen_range(0, self.train_size) as usize;
 
             let image_start = MNIST_IMAGE_SIZE as usize * i;
             let image_end = image_start + MNIST_IMAGE_SIZE as usize;
-            images[image_start..image_end].copy_from_slice(&self.train_images[index as usize]);
+            images[image_start..image_end].copy_from_slice(&self.train_images[index]);
 
             let label_offset = MNIST_NUM_CLASSES as usize * i;
             for j in 0..MNIST_NUM_CLASSES as usize {
-                labels[j + label_offset] = if self.train_labels[index as usize] == j as i32 {
+                labels[j + label_offset] = if self.train_labels[index] == j as i32 {
                     1.0
                 } else {
                     0.0
