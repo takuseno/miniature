@@ -42,6 +42,10 @@ impl Linear {
             F::broadcast::broadcast(self.bias.clone(), vec![batch_size, self.out_size]);
         F::add::add(h, broadcasted_bias)
     }
+
+    pub fn get_params(&self) -> Vec<Rc<RefCell<Variable>>> {
+        vec![self.weight.clone(), self.bias.clone()]
+    }
 }
 
 #[cfg(test)]
