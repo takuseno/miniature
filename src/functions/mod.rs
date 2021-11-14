@@ -7,20 +7,26 @@ use crate::variable::Variable;
 pub mod add;
 pub mod broadcast;
 pub mod div;
+pub mod log;
 pub mod matmul;
 pub mod mean;
 pub mod mul;
+pub mod neg;
 pub mod relu;
+pub mod softmax;
 pub mod square;
 pub mod sub;
 
 use add::Add;
 use broadcast::Broadcast;
 use div::Div;
+use log::Log;
 use matmul::MatMul;
 use mean::Mean;
 use mul::Mul;
+use neg::Neg;
 use relu::ReLu;
+use softmax::Softmax;
 use square::Square;
 use sub::Sub;
 
@@ -55,6 +61,19 @@ pub fn div(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
     let function = Box::new(Div {});
     let cg_function = Rc::new(RefCell::new(CgFunction {
         inputs: vec![x, y],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output
+}
+
+pub fn log(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
+    let function = Box::new(Log {});
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
         outputs: vec![output.clone()],
         function_impl: function,
     }));
@@ -105,6 +124,19 @@ pub fn mul(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
     output
 }
 
+pub fn neg(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
+    let function = Box::new(Neg {});
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output
+}
+
 pub fn relu(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
     let function = Box::new(ReLu {});
@@ -121,6 +153,19 @@ pub fn relu(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
 pub fn square(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
     let function = Box::new(Square {});
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output
+}
+
+pub fn softmax(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
+    let function = Box::new(Softmax {});
     let cg_function = Rc::new(RefCell::new(CgFunction {
         inputs: vec![x],
         outputs: vec![output.clone()],
@@ -180,6 +225,14 @@ mod tests {
     }
 
     #[test]
+    fn log_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
+        x.borrow_mut().ones();
+        let output = log(x);
+        backward(output);
+    }
+
+    #[test]
     fn matmul_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![2, 2])));
         let y = Rc::new(RefCell::new(Variable::new(vec![2, 2])));
@@ -219,9 +272,23 @@ mod tests {
     }
 
     #[test]
+    fn neg_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
+        let output = neg(x);
+        backward(output);
+    }
+
+    #[test]
     fn relu_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
         let output = relu(x);
+        backward(output);
+    }
+
+    #[test]
+    fn softmax_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![1, 10])));
+        let output = softmax(x);
         backward(output);
     }
 

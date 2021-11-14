@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     optim.set_params(fc2.get_params());
     optim.set_params(fc3.get_params());
 
-    for _ in 0..1000 {
+    for _ in 0..10000 {
         let (x, t) = dataset.sample(128);
 
         // forward
@@ -29,7 +29,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let output = fc3.call(h2);
 
         // loss
-        let loss = functions::mean(functions::square(functions::sub(output, t)));
+        let loss = functions::mean(functions::neg(functions::mul(
+            t,
+            functions::log(functions::softmax(output)),
+        )));
         println!("{}", loss.borrow().data[0]);
 
         optim.zero_grad();

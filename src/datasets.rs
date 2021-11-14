@@ -89,18 +89,20 @@ impl MNISTLoader {
         let base_dir = String::from(path);
 
         println!("Loading training images...");
-        let train_images =
-            load_mnist_image_file(&(base_dir.clone() + "/" + MNIST_TRAIN_IMAGE_FILE))?;
+        let train_image_path = &(base_dir.clone() + "/" + MNIST_TRAIN_IMAGE_FILE);
+        let train_images = load_mnist_image_file(train_image_path)?;
 
         println!("Loading training labels...");
-        let train_labels =
-            load_mnist_label_file(&(base_dir.clone() + "/" + MNIST_TRAIN_LABEL_FILE))?;
+        let train_label_path = &(base_dir.clone() + "/" + MNIST_TRAIN_LABEL_FILE);
+        let train_labels = load_mnist_label_file(train_label_path)?;
 
         println!("Loading test images...");
-        let test_images = load_mnist_image_file(&(base_dir.clone() + "/" + MNIST_TEST_IMAGE_FILE))?;
+        let test_image_path = &(base_dir.clone() + "/" + MNIST_TEST_IMAGE_FILE);
+        let test_images = load_mnist_image_file(test_image_path)?;
 
         println!("Loading test labels...");
-        let test_labels = load_mnist_label_file(&(base_dir.clone() + "/" + MNIST_TEST_LABEL_FILE))?;
+        let test_label_path = &(base_dir.clone() + "/" + MNIST_TEST_LABEL_FILE);
+        let test_labels = load_mnist_label_file(test_label_path)?;
 
         let train_size = train_images.len() as i32;
         let test_size = test_images.len() as i32;
