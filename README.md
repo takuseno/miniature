@@ -21,6 +21,7 @@ use miniature::parametric_functions as PF;
 use miniature::optimizer::SGD;
 use miniature::optimizer::OptimizerImpl;
 use miniature::variable::Variable;
+use miniature::graph::backward;
 
 fn main() {
     let fc1 = PF::linear::Linear::new(16, 32);
@@ -44,7 +45,7 @@ fn main() {
         println!("{}", loss.borrow().data[0]);
 
         optim.zero_grad();
-        graph::backward(loss);
+        backward(loss);
         optim.update();
     }
 }
