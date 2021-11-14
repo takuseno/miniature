@@ -37,7 +37,7 @@ fn main() {
         t.borrow_mut().zeros();
 
         // forward
-        let h = fc1.call(x);
+        let h = F::relu(fc1.call(x));
         let output = fc2.call(h);
 
         // loss
