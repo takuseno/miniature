@@ -21,7 +21,7 @@ impl Linear {
         bias.borrow_mut().zeros();
 
         Self {
-            weight: weight.clone(),
+            weight: weight,
             bias: bias,
             in_size: in_size,
             out_size: out_size,
