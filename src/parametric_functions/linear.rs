@@ -14,15 +14,8 @@ pub struct Linear {
 
 impl Linear {
     pub fn new(in_size: u32, out_size: u32) -> Self {
-        let weight = Rc::new(RefCell::new(Variable::new(vec![in_size, out_size])));
+        let weight = Rc::new(RefCell::new(Variable::rand(vec![in_size, out_size])));
         let bias = Rc::new(RefCell::new(Variable::new(vec![1, out_size])));
-
-        // randomly initialize weight
-        let mut rng = rand::thread_rng();
-        let weight_data = &mut weight.borrow_mut().data;
-        for i in 0..(in_size * out_size) as usize {
-            weight_data[i] = rng.gen();
-        }
 
         // initialize bias with zeros
         bias.borrow_mut().zeros();

@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -30,6 +31,18 @@ impl Variable {
             data: data,
             grad: grad,
         }
+    }
+
+    pub fn rand(shape: Vec<u32>) -> Self {
+        let mut variable = Self::new(shape);
+
+        // randomly initialize weight
+        let mut rng = rand::thread_rng();
+        for i in 0..variable.size() as usize {
+            variable.data[i] = rng.gen();
+        }
+
+        variable
     }
 
     pub fn size(&self) -> u32 {
