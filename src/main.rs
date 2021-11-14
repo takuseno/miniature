@@ -6,9 +6,6 @@ mod optimizer;
 mod parametric_functions;
 mod variable;
 
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use optimizer::OptimizerImpl;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -23,7 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     optim.set_params(fc2.get_params());
     optim.set_params(fc3.get_params());
 
-    for i in 0..1000 {
+    for _ in 0..1000 {
         let (x, t) = dataset.sample(128);
 
         // forward

@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::function::CgFunction;
 use crate::function::FunctionImpl;
 use crate::variable::Variable;
 

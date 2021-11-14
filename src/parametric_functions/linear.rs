@@ -1,4 +1,3 @@
-use rand::Rng;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -8,7 +7,6 @@ use crate::variable::Variable;
 pub struct Linear {
     weight: Rc<RefCell<Variable>>,
     bias: Rc<RefCell<Variable>>,
-    in_size: u32,
     out_size: u32,
 }
 
@@ -23,7 +21,6 @@ impl Linear {
         Self {
             weight: weight,
             bias: bias,
-            in_size: in_size,
             out_size: out_size,
         }
     }
