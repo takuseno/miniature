@@ -40,11 +40,13 @@ impl FunctionImpl for Onehot {
         let x = inputs[0].borrow();
         let mut output = outputs[0].borrow_mut();
 
+        output.zeros();
+
         for i in 0..x.size() as usize {
             let offset = i * self.num_classes as usize;
-            for j in 0..self.num_classes as usize {
-                output.data[j + offset] = if x.data[i] == j as f32 { 1.0 } else { 0.0 }
-            }
+            let label = x.data[i];
+            assert_eq!((label as u32) < self.num_classes, true);
+            output.data[offset + label as usize] = 1.0;
         }
     }
 
