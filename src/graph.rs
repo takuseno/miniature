@@ -24,6 +24,9 @@ pub fn backward(variable: Rc<RefCell<Variable>>) {
         function.borrow_mut().backward();
 
         for input in function.borrow_mut().inputs.iter() {
+            if !input.borrow().need_grad {
+                continue;
+            }
             let borrowed_input = input.borrow();
             let parent = borrowed_input.parent.as_ref();
             if parent.is_some() {

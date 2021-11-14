@@ -5,9 +5,9 @@ use crate::function::FunctionImpl;
 use crate::variable::Variable;
 
 #[derive(Debug)]
-pub struct ReLu {}
+pub struct Argmax {}
 
-impl ReLu {
+impl Argmax {
     fn validate(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -19,11 +19,14 @@ impl ReLu {
         let x = inputs[0].borrow();
         let output = outputs[0].borrow();
 
-        assert_eq!(x.shape, output.shape);
+        // supports only 2-dim tensors
+        assert_eq!(x.shape.len(), 2);
+        assert_eq!(output.shape.len(), 1);
+        assert_eq!(x.shape[0], output.shape[0]);
     }
 }
 
-impl FunctionImpl for ReLu {
+impl FunctionImpl for Argmax {
     fn forward_impl(
         &mut self,
         inputs: &Vec<Rc<RefCell<Variable>>>,
@@ -34,8 +37,17 @@ impl FunctionImpl for ReLu {
         let x = inputs[0].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.size() as usize {
-            output.data[i] = if x.data[i] > 0.0 { x.data[i] } else { 0.0 };
+        for i in 0..x.shape[0] as usize {
+            let offset = i * x.shape[1] as usize;
+            let mut max = x.data[offset];
+            let mut max_index = 0.0;
+            for j in 1..x.shape[1] as usize {
+                if x.data[j + offset] > max {
+                    max = x.data[j + offset];
+                    max_index = j as f32;
+                }
+            }
+            output.data[i] = max_index;
         }
     }
 
@@ -44,17 +56,10 @@ impl FunctionImpl for ReLu {
         inputs: &Vec<Rc<RefCell<Variable>>>,
         outputs: &Vec<Rc<RefCell<Variable>>>,
     ) {
-        self.validate(inputs, outputs);
-
-        let mut x = inputs[0].borrow_mut();
-        let output = outputs[0].borrow();
-
-        for i in 0..x.size() as usize {
-            x.grad[i] += if x.data[i] > 0.0 { output.grad[i] } else { 0.0 };
-        }
+        panic!("Argmax does not support backward.")
     }
 
     fn get_name(&self) -> &str {
-        "ReLu"
+        "Argmax"
     }
 }

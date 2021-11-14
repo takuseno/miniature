@@ -10,6 +10,7 @@ pub struct Variable {
     pub shape: Vec<u32>,
     pub data: Vec<f32>,
     pub grad: Vec<f32>,
+    pub need_grad: bool,
 }
 
 impl Variable {
@@ -30,6 +31,7 @@ impl Variable {
             shape: shape,
             data: data,
             grad: grad,
+            need_grad: true,
         }
     }
 
@@ -62,6 +64,10 @@ impl Variable {
     pub fn set_grad(&mut self, grad: &[f32]) {
         assert_eq!(self.size() as usize, grad.len());
         self.grad.copy_from_slice(grad);
+    }
+
+    pub fn set_need_grad(&mut self, need_grad: bool) {
+        self.need_grad = need_grad;
     }
 
     pub fn zeros(&mut self) {

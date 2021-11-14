@@ -5,6 +5,7 @@ use crate::function::CgFunction;
 use crate::variable::Variable;
 
 pub mod add;
+pub mod argmax;
 pub mod broadcast;
 pub mod div;
 pub mod log;
@@ -12,12 +13,14 @@ pub mod matmul;
 pub mod mean;
 pub mod mul;
 pub mod neg;
+pub mod onehot;
 pub mod relu;
 pub mod softmax;
 pub mod square;
 pub mod sub;
 
 use add::Add;
+use argmax::Argmax;
 use broadcast::Broadcast;
 use div::Div;
 use log::Log;
@@ -25,6 +28,7 @@ use matmul::MatMul;
 use mean::Mean;
 use mul::Mul;
 use neg::Neg;
+use onehot::Onehot;
 use relu::ReLu;
 use softmax::Softmax;
 use square::Square;
@@ -40,6 +44,21 @@ pub fn add(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
     }));
     cg_function.borrow_mut().forward();
     output.borrow_mut().set_parent(cg_function);
+    output
+}
+
+pub fn argmax(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let shape = vec![x.borrow().shape[0]];
+    let output = Rc::new(RefCell::new(Variable::new(shape)));
+    let function = Box::new(Argmax {});
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output.borrow_mut().set_need_grad(false);
     output
 }
 
@@ -137,6 +156,23 @@ pub fn neg(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     output
 }
 
+pub fn onehot(x: Rc<RefCell<Variable>>, num_classes: u32) -> Rc<RefCell<Variable>> {
+    let shape = vec![x.borrow().shape[0], num_classes];
+    let output = Rc::new(RefCell::new(Variable::new(shape)));
+    let function = Box::new(Onehot {
+        num_classes: num_classes,
+    });
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output.borrow_mut().set_need_grad(false);
+    output
+}
+
 pub fn relu(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
     let function = Box::new(ReLu {});
@@ -202,6 +238,14 @@ mod tests {
         let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
         let output = add(h, z);
         backward(output);
+    }
+
+    #[test]
+    fn argmax_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![10, 5])));
+        let output = argmax(x);
+        assert_eq!(output.borrow().shape.len(), 1);
+        assert_eq!(output.borrow().shape[0], 10);
     }
 
     #[test]
@@ -276,6 +320,14 @@ mod tests {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
         let output = neg(x);
         backward(output);
+    }
+
+    #[test]
+    fn onehot_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![10])));
+        let output = onehot(x, 20);
+        assert_eq!(output.borrow().shape[0], 10);
+        assert_eq!(output.borrow().shape[1], 20);
     }
 
     #[test]

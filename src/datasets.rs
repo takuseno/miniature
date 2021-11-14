@@ -80,8 +80,8 @@ pub struct MNISTLoader {
     train_labels: Vec<i32>,
     test_images: Vec<Vec<f32>>,
     test_labels: Vec<i32>,
-    train_size: i32,
-    test_size: i32,
+    train_size: u32,
+    test_size: u32,
 }
 
 impl MNISTLoader {
@@ -104,8 +104,8 @@ impl MNISTLoader {
         let test_label_path = &(base_dir.clone() + "/" + MNIST_TEST_LABEL_FILE);
         let test_labels = load_mnist_label_file(test_label_path)?;
 
-        let train_size = train_images.len() as i32;
-        let test_size = test_images.len() as i32;
+        let train_size = train_images.len() as u32;
+        let test_size = test_images.len() as u32;
 
         Ok(Self {
             train_images: train_images,
@@ -121,28 +121,52 @@ impl MNISTLoader {
         let mut images: Vec<f32> = Vec::new();
         let mut labels: Vec<f32> = Vec::new();
         images.resize((batch_size * MNIST_IMAGE_SIZE) as usize, 0.0);
-        labels.resize((batch_size * MNIST_NUM_CLASSES) as usize, 0.0);
+        labels.resize(batch_size as usize, 0.0);
 
         let mut rng = rand::thread_rng();
         for i in 0..batch_size as usize {
             let index = rng.gen_range(0, self.train_size) as usize;
 
+            // set image
             let image_start = MNIST_IMAGE_SIZE as usize * i;
             let image_end = image_start + MNIST_IMAGE_SIZE as usize;
             images[image_start..image_end].copy_from_slice(&self.train_images[index]);
 
-            let label_offset = MNIST_NUM_CLASSES as usize * i;
-            for j in 0..MNIST_NUM_CLASSES as usize {
-                labels[j + label_offset] = if self.train_labels[index] == j as i32 {
-                    1.0
-                } else {
-                    0.0
-                }
-            }
+            // set label
+            labels[i] = self.train_labels[index] as f32;
         }
 
-        let image_batch = Rc::new(RefCell::new(Variable::new(vec![batch_size, 28 * 28])));
-        let label_batch = Rc::new(RefCell::new(Variable::new(vec![batch_size, 10])));
+        let image_batch = Rc::new(RefCell::new(Variable::new(vec![
+            batch_size,
+            MNIST_IMAGE_SIZE,
+        ])));
+        let label_batch = Rc::new(RefCell::new(Variable::new(vec![batch_size])));
+        image_batch.borrow_mut().set_data(&images);
+        label_batch.borrow_mut().set_data(&labels);
+        (image_batch, label_batch)
+    }
+
+    pub fn get_test_data(&self) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
+        let mut images: Vec<f32> = Vec::new();
+        let mut labels: Vec<f32> = Vec::new();
+        images.resize((self.test_size * MNIST_IMAGE_SIZE) as usize, 0.0);
+        labels.resize((self.test_size) as usize, 0.0);
+
+        for i in 0..self.test_size as usize {
+            // set image
+            let image_start = MNIST_IMAGE_SIZE as usize * i;
+            let image_end = image_start + MNIST_IMAGE_SIZE as usize;
+            images[image_start..image_end].copy_from_slice(&self.test_images[i]);
+
+            // set label
+            labels[i] = self.test_labels[i] as f32;
+        }
+
+        let image_batch = Rc::new(RefCell::new(Variable::new(vec![
+            self.test_size,
+            MNIST_IMAGE_SIZE,
+        ])));
+        let label_batch = Rc::new(RefCell::new(Variable::new(vec![self.test_size])));
         image_batch.borrow_mut().set_data(&images);
         label_batch.borrow_mut().set_data(&labels);
         (image_batch, label_batch)
