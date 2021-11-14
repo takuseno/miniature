@@ -55,16 +55,12 @@ impl Variable {
 
     pub fn set_data(&mut self, data: &[f32]) {
         assert_eq!(self.size() as usize, data.len());
-        for i in 0..data.len() {
-            self.data[i] = data[i];
-        }
+        self.data.copy_from_slice(data);
     }
 
     pub fn set_grad(&mut self, grad: &[f32]) {
         assert_eq!(self.size() as usize, grad.len());
-        for i in 0..grad.len() {
-            self.grad[i] = grad[i];
-        }
+        self.grad.copy_from_slice(grad);
     }
 
     pub fn zeros(&mut self) {
