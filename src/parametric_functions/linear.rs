@@ -37,10 +37,9 @@ impl Linear {
 
     pub fn call(&self, x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
         let batch_size = x.borrow().shape[0];
-        let h = F::matmul::matmul(x, self.weight.clone());
-        let broadcasted_bias =
-            F::broadcast::broadcast(self.bias.clone(), vec![batch_size, self.out_size]);
-        F::add::add(h, broadcasted_bias)
+        let h = F::matmul(x, self.weight.clone());
+        let broadcasted_bias = F::broadcast(self.bias.clone(), vec![batch_size, self.out_size]);
+        F::add(h, broadcasted_bias)
     }
 
     pub fn get_params(&self) -> Vec<Rc<RefCell<Variable>>> {

@@ -64,32 +64,3 @@ impl FunctionImpl for Mul {
         "Mul"
     }
 }
-
-pub fn mul(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Mul {});
-    let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x, y],
-        outputs: vec![output.clone()],
-        function_impl: function,
-    }));
-    cg_function.borrow_mut().forward();
-    output.borrow_mut().set_parent(cg_function);
-    output
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn mul_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = mul(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = mul(h, z);
-        backward(output);
-    }
-}

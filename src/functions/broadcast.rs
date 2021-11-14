@@ -7,7 +7,7 @@ use crate::variable::Variable;
 
 #[derive(Debug)]
 pub struct Broadcast {
-    shape: Vec<u32>,
+    pub shape: Vec<u32>,
 }
 
 impl Broadcast {
@@ -75,31 +75,5 @@ impl FunctionImpl for Broadcast {
 
     fn get_name(&self) -> &str {
         "Broadcast"
-    }
-}
-
-pub fn broadcast(x: Rc<RefCell<Variable>>, shape: Vec<u32>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(shape.clone())));
-    let function = Box::new(Broadcast { shape: shape });
-    let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x],
-        outputs: vec![output.clone()],
-        function_impl: function,
-    }));
-    cg_function.borrow_mut().forward();
-    output.borrow_mut().set_parent(cg_function);
-    output
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn broadcast_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = broadcast(x, vec![3, 2, 3]);
-        backward(output);
     }
 }

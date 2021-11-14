@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 use crate::variable::Variable;
 
@@ -16,7 +16,10 @@ pub struct SGD {
 
 impl SGD {
     pub fn new(lr: f32) -> Self {
-        Self {params: vec![], lr: lr}
+        Self {
+            params: vec![],
+            lr: lr,
+        }
     }
 }
 

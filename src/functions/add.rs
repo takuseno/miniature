@@ -64,32 +64,3 @@ impl FunctionImpl for Add {
         "Add"
     }
 }
-
-pub fn add(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Add {});
-    let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x, y],
-        outputs: vec![output.clone()],
-        function_impl: function,
-    }));
-    cg_function.borrow_mut().forward();
-    output.borrow_mut().set_parent(cg_function);
-    output
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn add_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = add(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = add(h, z);
-        backward(output);
-    }
-}

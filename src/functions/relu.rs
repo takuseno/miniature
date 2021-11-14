@@ -59,29 +59,3 @@ impl FunctionImpl for ReLu {
         "ReLu"
     }
 }
-
-pub fn relu(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(ReLu {});
-    let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x],
-        outputs: vec![output.clone()],
-        function_impl: function,
-    }));
-    cg_function.borrow_mut().forward();
-    output.borrow_mut().set_parent(cg_function);
-    output
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn relu_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = relu(x);
-        backward(output);
-    }
-}

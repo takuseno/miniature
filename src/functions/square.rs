@@ -59,29 +59,3 @@ impl FunctionImpl for Square {
         "Square"
     }
 }
-
-pub fn square(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
-    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
-    let function = Box::new(Square {});
-    let cg_function = Rc::new(RefCell::new(CgFunction {
-        inputs: vec![x],
-        outputs: vec![output.clone()],
-        function_impl: function,
-    }));
-    cg_function.borrow_mut().forward();
-    output.borrow_mut().set_parent(cg_function);
-    output
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn square_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = square(x);
-        backward(output);
-    }
-}
