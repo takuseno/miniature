@@ -40,6 +40,7 @@ impl Variable {
         let mut rng = rand::thread_rng();
         for i in 0..variable.size() as usize {
             variable.data[i] = rng.gen();
+            variable.data[i] -= 0.5;
         }
 
         variable

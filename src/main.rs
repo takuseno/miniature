@@ -14,9 +14,9 @@ use optimizer::OptimizerImpl;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dataset = datasets::MNISTLoader::new("datasets")?;
 
-    let fc1 = parametric_functions::linear::Linear::new(28 * 28, 256);
-    let fc2 = parametric_functions::linear::Linear::new(256, 256);
-    let fc3 = parametric_functions::linear::Linear::new(256, 10);
+    let fc1 = parametric_functions::linear::Linear::new(28 * 28, 128);
+    let fc2 = parametric_functions::linear::Linear::new(128, 128);
+    let fc3 = parametric_functions::linear::Linear::new(128, 10);
 
     let mut optim = optimizer::SGD::new(0.001);
     optim.set_params(fc1.get_params());
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     optim.set_params(fc3.get_params());
 
     for i in 0..1000 {
-        let (x, t) = dataset.sample(32);
+        let (x, t) = dataset.sample(128);
 
         // forward
         let h1 = functions::relu(fc1.call(x));
