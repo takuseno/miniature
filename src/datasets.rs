@@ -37,8 +37,7 @@ fn load_mnist_image_file(path: &str) -> Result<Vec<Vec<f32>>, Box<dyn std::error
     // read pixel data
     let mut images: Vec<Vec<f32>> = Vec::new();
     for _ in 0..total_number {
-        let mut image: Vec<f32> = Vec::new();
-        image.resize((height * width) as usize, 0.0);
+        let mut image = vec![0.0; (height * width) as usize];
         for i in 0..(height * width) as usize {
             let mut buf = [0; 1];
             file.read(&mut buf)?;
@@ -64,8 +63,7 @@ fn load_mnist_label_file(path: &str) -> Result<Vec<i32>, Box<dyn std::error::Err
     let total_number = i32::from_be_bytes(buf);
 
     // read label data
-    let mut labels: Vec<i32> = Vec::new();
-    labels.resize(total_number as usize, 0);
+    let mut labels: Vec<i32> = vec![0; total_number as usize];
     for i in 0..total_number as usize {
         let mut buf = [0; 1];
         file.read(&mut buf)?;
@@ -118,10 +116,8 @@ impl MNISTLoader {
     }
 
     pub fn sample(&self, batch_size: u32) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
-        let mut images: Vec<f32> = Vec::new();
-        let mut labels: Vec<f32> = Vec::new();
-        images.resize((batch_size * MNIST_IMAGE_SIZE) as usize, 0.0);
-        labels.resize(batch_size as usize, 0.0);
+        let mut images = vec![0.0; (batch_size * MNIST_IMAGE_SIZE) as usize];
+        let mut labels = vec![0.0; batch_size as usize];
 
         let mut rng = rand::thread_rng();
         for i in 0..batch_size as usize {
@@ -147,10 +143,8 @@ impl MNISTLoader {
     }
 
     pub fn get_test_data(&self) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
-        let mut images: Vec<f32> = Vec::new();
-        let mut labels: Vec<f32> = Vec::new();
-        images.resize((self.test_size * MNIST_IMAGE_SIZE) as usize, 0.0);
-        labels.resize((self.test_size) as usize, 0.0);
+        let mut images = vec![0.0; (self.test_size * MNIST_IMAGE_SIZE) as usize];
+        let mut labels = vec![0.0; self.test_size as usize];
 
         for i in 0..self.test_size as usize {
             // set image

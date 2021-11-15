@@ -20,11 +20,8 @@ impl Variable {
             size *= shape[i];
         }
 
-        let mut data = Vec::new();
-        let mut grad = Vec::new();
-
-        data.resize(size as usize, 0.0);
-        grad.resize(size as usize, 0.0);
+        let data = vec![0.0; size as usize];
+        let grad = vec![0.0; size as usize];
 
         Self {
             parent: None,
