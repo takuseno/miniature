@@ -14,7 +14,10 @@ pub struct Optimizer {
 
 impl Optimizer {
     pub fn new(optimizer_impl: Box<dyn OptimizerImpl>) -> Self {
-        Self {params: vec![], optimizer_impl: optimizer_impl}
+        Self {
+            params: vec![],
+            optimizer_impl: optimizer_impl,
+        }
     }
 
     pub fn set_params(&mut self, params: Vec<Rc<RefCell<Variable>>>) {

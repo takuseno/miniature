@@ -23,7 +23,7 @@ pub fn backward(variable: Rc<RefCell<Variable>>) {
 
         function.borrow_mut().backward();
 
-        for input in function.borrow_mut().inputs.iter() {
+        for input in function.borrow_mut().get_inputs().iter() {
             if !input.borrow().need_grad {
                 continue;
             }

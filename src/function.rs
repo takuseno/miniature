@@ -25,12 +25,24 @@ impl std::fmt::Debug for dyn FunctionImpl {
 
 #[derive(Debug)]
 pub struct CgFunction {
-    pub inputs: Vec<Rc<RefCell<Variable>>>,
-    pub outputs: Vec<Rc<RefCell<Variable>>>,
-    pub function_impl: Box<dyn FunctionImpl>,
+    inputs: Vec<Rc<RefCell<Variable>>>,
+    outputs: Vec<Rc<RefCell<Variable>>>,
+    function_impl: Box<dyn FunctionImpl>,
 }
 
 impl CgFunction {
+    pub fn new(
+        inputs: Vec<Rc<RefCell<Variable>>>,
+        outputs: Vec<Rc<RefCell<Variable>>>,
+        function_impl: Box<dyn FunctionImpl>,
+    ) -> Self {
+        Self {
+            inputs: inputs,
+            outputs: outputs,
+            function_impl: function_impl,
+        }
+    }
+
     pub fn forward(&mut self) {
         self.function_impl.forward_impl(&self.inputs, &self.outputs);
     }
@@ -38,5 +50,9 @@ impl CgFunction {
     pub fn backward(&mut self) {
         self.function_impl
             .backward_impl(&self.inputs, &self.outputs);
+    }
+
+    pub fn get_inputs(&self) -> &Vec<Rc<RefCell<Variable>>> {
+        &self.inputs
     }
 }
