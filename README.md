@@ -31,7 +31,6 @@ $ cargo run --release
 
 ## example
 ```rs
-use miniature::datasets::MNISTLoader;
 use miniature::functions as F;
 use miniature::graph::backward;
 use miniature::optimizer as S;
