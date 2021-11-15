@@ -225,6 +225,14 @@ pub fn sub(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
     output
 }
 
+pub fn cross_entropy_loss(
+    x: Rc<RefCell<Variable>>,
+    t: Rc<RefCell<Variable>>,
+) -> Rc<RefCell<Variable>> {
+    assert_eq!(x.borrow().shape, t.borrow().shape);
+    mean(neg(mul(t, log(softmax(x)))))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -454,5 +462,16 @@ mod tests {
         for i in 0..x.borrow().size() as usize {
             assert_eq!(output_data[i], x_data[i] - y_data[i]);
         }
+    }
+
+    #[test]
+    fn cross_entropy_loss_variables() {
+        let x = Rc::new(RefCell::new(Variable::new(vec![32, 10])));
+        let y = Rc::new(RefCell::new(Variable::new(vec![32, 10])));
+        let output = cross_entropy_loss(x.clone(), y.clone());
+        backward(output.clone());
+
+        assert_eq!(output.borrow().shape.len(), 1);
+        assert_eq!(output.borrow().shape[0], 1);
     }
 }

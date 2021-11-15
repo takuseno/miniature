@@ -26,8 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let output = fc2.call(h);
 
         // loss
-        let cross_entropy = F::neg(F::mul(onehot_t, F::log(F::softmax(output))));
-        let loss = F::mean(cross_entropy);
+        let loss = F::cross_entropy_loss(output, onehot_t);
 
         optim.zero_grad();
         backward(loss);
