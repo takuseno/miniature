@@ -34,7 +34,6 @@ $ cargo run --release
 use miniature::functions as F;
 use miniature::graph::backward;
 use miniature::optimizer as S;
-use miniature::optimizer::OptimizerImpl;
 use miniature::parametric_functions as PF;
 use miniature::variable::Variable;
 
