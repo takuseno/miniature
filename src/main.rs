@@ -1,7 +1,6 @@
 use miniature::datasets::MNISTLoader;
 use miniature::functions as F;
 use miniature::graph::backward;
-use miniature::optimizer::Optimizer;
 use miniature::optimizers as S;
 use miniature::parametric_functions as PF;
 

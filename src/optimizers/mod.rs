@@ -1,13 +1,15 @@
 mod sgd;
 
-pub fn sgd(lr: f32) -> Box<sgd::SGD> {
-    Box::new(sgd::SGD::new(lr))
+use crate::optimizer::Optimizer;
+
+pub fn sgd(lr: f32) -> Box<Optimizer> {
+    let sgd_impl = Box::new(sgd::SGD {lr: lr});
+    Box::new(Optimizer::new(sgd_impl))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::optimizer::Optimizer;
     use crate::variable::Variable;
     use std::cell::RefCell;
     use std::rc::Rc;
