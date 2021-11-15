@@ -36,24 +36,3 @@ impl Linear {
         vec![self.weight.clone(), self.bias.clone()]
     }
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::graph::backward;
-
-    #[test]
-    fn linear_forward_backward() {
-        let fc1 = Linear::new(100, 200);
-        let fc2 = Linear::new(200, 10);
-
-        let x = Rc::new(RefCell::new(Variable::new(vec![32, 100])));
-        let h = fc1.call(x);
-        let output = fc2.call(h);
-
-        assert_eq!(output.borrow().shape[0], 32);
-        assert_eq!(output.borrow().shape[1], 10);
-
-        backward(output);
-    }
-}
