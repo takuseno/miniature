@@ -1,4 +1,6 @@
-# miniature
+# miniature: a toy deep learning library written in Rust
+![MIT](https://img.shields.io/badge/license-MIT-blue)
+
 A miniature is a toy deep learning library written in Rust.
 
 The miniature is:
@@ -10,6 +12,10 @@ The miniature is NOT:
 - optimized for computational costs.
 - a product-ready library.
 
+## features
+- define-by-run style API
+- easy as Python libraries (e.g. TensorFlow, PyTorch, nnabla)
+- easy to add more features (e.g. layers, optimizers)
 
 ## run MNIST
 Download MNIST dataset for the first time.
@@ -31,57 +37,37 @@ use miniature::graph::backward;
 use miniature::optimizer as S;
 use miniature::optimizer::OptimizerImpl;
 use miniature::parametric_functions as PF;
+use miniature::variable::Variable;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let dataset = MNISTLoader::new("datasets")?;
-    let (test_x, test_t) = dataset.get_test_data();
+use std::rc::Rc;
+use std::cell::RefCell;
 
-    let fc1 = PF::linear::Linear::new(28 * 28, 128);
-    let fc2 = PF::linear::Linear::new(128, 128);
-    let fc3 = PF::linear::Linear::new(128, 10);
+fn main() {
+    // define layers
+    let fc1 = PF::linear(28 * 28, 256);
+    let fc2 = PF::linear(256, 256);
+    let fc3 = PF::linear(256, 10);
 
-    let mut optim = S::SGD::new(0.001);
+    // define optimizer
+    let mut optim = S::sgd(0.001);
     optim.set_params(fc1.get_params());
     optim.set_params(fc2.get_params());
     optim.set_params(fc3.get_params());
 
-    let mut iter = 0;
-    loop {
-        let (x, t) = dataset.sample(128);
-        let onehot_t = F::onehot(t, 10);
+    let x = Rc::new(RefCell::new(Variable::rand(vec![32, 28 * 28])));
+    let t = Rc::new(RefCell::new(Variable::rand(vec![32])));
 
-        // forward
-        let h1 = F::relu(fc1.call(x));
-        let h2 = F::relu(fc2.call(h1));
-        let output = fc3.call(h2);
+    // forward
+    let h1 = F::relu(fc1.call(x));
+    let h2 = F::relu(fc2.call(h1));
+    let y = fc3.call(h2);
 
-        // loss
-        let cross_entropy = F::neg(F::mul(onehot_t, F::log(F::softmax(output))));
-        let loss = F::mean(cross_entropy);
+    // loss
+    let loss = F::cross_entropy_loss(y, F::onehot(t, 10));
 
-        optim.zero_grad();
-        backward(loss);
-        optim.update();
-
-        iter += 1;
-        if iter % 100 == 0 {
-            // test
-            let h1 = F::relu(fc1.call(test_x.clone()));
-            let h2 = F::relu(fc2.call(h1));
-            let output = F::argmax(fc3.call(h2));
-
-            let mut count = 0;
-            let test_size = output.borrow().shape[0];
-            for i in 0..test_size as usize {
-                if output.borrow().data[i] == test_t.borrow().data[i] {
-                    count += 1;
-                }
-            }
-            let accuracy = (count as f32) / (test_size as f32);
-            println!("Iteration {}: Accuracy={}", iter, accuracy);
-        }
-    }
-
-    Ok(())
+    // update
+    optim.zero_grad();
+    backward(loss);
+    optim.update();
 }
 ```
