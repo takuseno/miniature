@@ -20,18 +20,18 @@ fn load_mnist_image_file(path: &str) -> Result<Vec<Vec<f32>>, Box<dyn std::error
     let mut buf = [0; 4];
 
     // read magic number
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
 
     // read total number
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
     let total_number = i32::from_be_bytes(buf);
 
     // read height
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
     let height = i32::from_be_bytes(buf);
 
     // read width
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
     let width = i32::from_be_bytes(buf);
 
     // read pixel data
@@ -40,7 +40,7 @@ fn load_mnist_image_file(path: &str) -> Result<Vec<Vec<f32>>, Box<dyn std::error
         let mut image = vec![0.0; (height * width) as usize];
         for i in 0..(height * width) as usize {
             let mut buf = [0; 1];
-            file.read(&mut buf)?;
+            file.read_exact(&mut buf)?;
             image[i] = u8::from_be_bytes(buf) as f32 / 255.0;
         }
         images.push(image);
@@ -56,17 +56,17 @@ fn load_mnist_label_file(path: &str) -> Result<Vec<i32>, Box<dyn std::error::Err
     let mut buf = [0; 4];
 
     // read magic number
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
 
     // read total number
-    file.read(&mut buf)?;
+    file.read_exact(&mut buf)?;
     let total_number = i32::from_be_bytes(buf);
 
     // read label data
     let mut labels: Vec<i32> = vec![0; total_number as usize];
     for i in 0..total_number as usize {
         let mut buf = [0; 1];
-        file.read(&mut buf)?;
+        file.read_exact(&mut buf)?;
         labels[i] = u8::from_be_bytes(buf) as i32;
     }
 

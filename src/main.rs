@@ -40,7 +40,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut count = 0;
             let test_size = output.borrow().shape[0];
             for i in 0..test_size as usize {
-                if output.borrow().data[i] == test_t.borrow().data[i] {
+                let pred_label = output.borrow().data[i] as u8;
+                let test_label = test_t.borrow().data[i] as u8;
+                if pred_label == test_label {
                     count += 1;
                 }
             }
