@@ -9,16 +9,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dataset = MNISTLoader::new("datasets")?;
     let (test_x, test_t) = dataset.get_test_data();
 
-    let fc1 = PF::linear(28 * 28, 50);
-    let fc2 = PF::linear(50, 10);
+    let fc1 = PF::linear(28 * 28, 128);
+    let fc2 = PF::linear(128, 10);
 
-    let mut optim = S::sgd(0.01);
+    let mut optim = S::sgd(0.001);
     optim.set_params(fc1.get_params());
     optim.set_params(fc2.get_params());
 
     let mut iter = 0;
     loop {
-        let (x, t) = dataset.sample(32);
+        let (x, t) = dataset.sample(16);
         let onehot_t = F::onehot(t, 10);
 
         // forward
