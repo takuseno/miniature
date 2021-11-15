@@ -229,51 +229,93 @@ pub fn sub(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
 mod tests {
     use super::*;
     use crate::graph::backward;
+    use crate::test_utils::assert_eq_close;
+    use rand::Rng;
 
     #[test]
     fn add_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = add(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = add(h, z);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let y = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = add(x.clone(), y.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let y_data = &y.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(x_data[i] + y_data[i], output_data[i]);
+        }
     }
 
     #[test]
     fn argmax_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![10, 5])));
-        let output = argmax(x);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![10, 5])));
+        let output = argmax(x.clone());
         assert_eq!(output.borrow().shape.len(), 1);
         assert_eq!(output.borrow().shape[0], 10);
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().shape[0] as usize {
+            let offset = i * x.borrow().shape[1] as usize;
+            let mut max = x_data[offset];
+            let mut max_index = 0;
+            for j in 1..x.borrow().shape[1] as usize {
+                if x_data[j + offset] > max {
+                    max = x_data[j + offset];
+                    max_index = j;
+                }
+            }
+            assert_eq!(output_data[i] as usize, max_index);
+        }
     }
 
     #[test]
     fn broadcast_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = broadcast(x, vec![3, 2, 3]);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = broadcast(x.clone(), vec![3, 2, 3]);
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..output.borrow().shape[0] as usize {
+            let offset = i * x.borrow().size() as usize;
+            for j in 0..x.borrow().size() as usize {
+                assert_eq!(output_data[j + offset], x_data[j]);
+            }
+        }
     }
 
     #[test]
     fn div_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        x.borrow_mut().ones();
-        y.borrow_mut().ones();
-        let h = div(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        z.borrow_mut().ones();
-        let output = div(h, z);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let y = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = div(x.clone(), y.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let y_data = &y.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(output_data[i], x_data[i] / y_data[i]);
+        }
     }
 
     #[test]
     fn log_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        x.borrow_mut().ones();
-        let output = log(x);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let size = x.borrow().size();
+        for i in 0..size as usize {
+            x.borrow_mut().data[i] += 1.0; // to prevent log(0)
+        }
+        let output = log(x.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(output_data[i], x_data[i].ln());
+        }
     }
 
     #[test]
@@ -300,47 +342,102 @@ mod tests {
 
     #[test]
     fn mean_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = mean(x);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = mean(x.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        let mut sum = 0.0;
+        for i in 0..x.borrow().size() as usize {
+            sum += x_data[i];
+        }
+        assert_eq!(output_data[0], sum / x.borrow().size() as f32);
     }
 
     #[test]
     fn mul_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = mul(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = mul(h, z);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let y = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = mul(x.clone(), y.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let y_data = &y.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(output_data[i], x_data[i] * y_data[i]);
+        }
     }
 
     #[test]
     fn neg_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = neg(x);
-        backward(output);
+        let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
+        let output = neg(x.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(output_data[i], -x_data[i]);
+        }
     }
 
     #[test]
     fn onehot_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![10])));
-        let output = onehot(x, 20);
+        let mut rng = rand::thread_rng();
+        let size = x.borrow().size();
+        for i in 0..size as usize {
+            x.borrow_mut().data[i] = rng.gen_range(0, 20) as f32;
+        }
+        let output = onehot(x.clone(), 20);
         assert_eq!(output.borrow().shape[0], 10);
         assert_eq!(output.borrow().shape[1], 20);
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            let offset = i * 20;
+            for j in 0..20 as usize {
+                if x_data[i] == j as f32 {
+                    assert_eq!(output_data[j + offset], 1.0);
+                } else {
+                    assert_eq!(output_data[j + offset], 0.0);
+                }
+            }
+        }
     }
 
     #[test]
     fn relu_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = relu(x);
-        backward(output);
+        let output = relu(x.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            if x_data[i] > 0.0 {
+                assert_eq!(output_data[i], x_data[i]);
+            } else {
+                assert_eq!(output_data[i], 0.0);
+            }
+        }
     }
 
     #[test]
     fn softmax_variables() {
-        let x = Rc::new(RefCell::new(Variable::new(vec![1, 10])));
+        let x = Rc::new(RefCell::new(Variable::rand(vec![2, 10])));
         let output = softmax(x);
+        for i in 0..output.borrow().shape[0] as usize {
+            let offset = i * output.borrow().shape[1] as usize;
+            let mut sum = 0.0;
+            for j in 0..output.borrow().shape[1] as usize {
+                sum += output.borrow().data[j + offset];
+            }
+            assert_eq_close(sum, 1.0, 0.01);
+        }
         backward(output);
     }
 
@@ -348,9 +445,14 @@ mod tests {
     fn sub_variables() {
         let x = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
         let y = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let h = sub(x, y);
-        let z = Rc::new(RefCell::new(Variable::new(vec![1, 2, 3])));
-        let output = sub(h, z);
-        backward(output);
+        let output = sub(x.clone(), y.clone());
+        backward(output.clone());
+
+        let x_data = &x.borrow().data;
+        let y_data = &y.borrow().data;
+        let output_data = &output.borrow().data;
+        for i in 0..x.borrow().size() as usize {
+            assert_eq!(output_data[i], x_data[i] - y_data[i]);
+        }
     }
 }
