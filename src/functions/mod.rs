@@ -9,6 +9,7 @@ mod argmax;
 mod broadcast;
 mod div;
 mod log;
+mod log_softmax;
 mod matmul;
 mod mean;
 mod mul;
@@ -24,6 +25,7 @@ use argmax::Argmax;
 use broadcast::Broadcast;
 use div::Div;
 use log::Log;
+use log_softmax::LogSoftmax;
 use matmul::MatMul;
 use mean::Mean;
 use mul::Mul;
@@ -91,6 +93,19 @@ pub fn div(x: Rc<RefCell<Variable>>, y: Rc<RefCell<Variable>>) -> Rc<RefCell<Var
 pub fn log(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
     let function = Box::new(Log {});
+    let cg_function = Rc::new(RefCell::new(CgFunction {
+        inputs: vec![x],
+        outputs: vec![output.clone()],
+        function_impl: function,
+    }));
+    cg_function.borrow_mut().forward();
+    output.borrow_mut().set_parent(cg_function);
+    output
+}
+
+pub fn log_softmax(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
+    let output = Rc::new(RefCell::new(Variable::new(x.borrow().shape.clone())));
+    let function = Box::new(LogSoftmax {});
     let cg_function = Rc::new(RefCell::new(CgFunction {
         inputs: vec![x],
         outputs: vec![output.clone()],
@@ -230,7 +245,7 @@ pub fn cross_entropy_loss(
     t: Rc<RefCell<Variable>>,
 ) -> Rc<RefCell<Variable>> {
     assert_eq!(x.borrow().shape, t.borrow().shape);
-    mean(neg(mul(t, log(softmax(x)))))
+    mean(neg(mul(t, log_softmax(x))))
 }
 
 #[cfg(test)]
@@ -323,6 +338,20 @@ mod tests {
         let output_data = &output.borrow().data;
         for i in 0..x.borrow().size() as usize {
             assert_eq!(output_data[i], x_data[i].ln());
+        }
+    }
+
+    #[test]
+    fn log_softmax_variables() {
+        let x = Rc::new(RefCell::new(Variable::rand(vec![32, 10])));
+        let output = log_softmax(x.clone());
+        backward(output.clone());
+
+        let test_output = log(softmax(x.clone()));
+        let output_data = &output.borrow().data;
+        let test_output_data = &test_output.borrow().data;
+        for i in 0..output.borrow().size() as usize {
+            assert_eq_close(output_data[i], test_output_data[i], 0.001);
         }
     }
 
