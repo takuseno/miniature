@@ -1,5 +1,6 @@
 # miniature: a toy deep learning library written in Rust
 ![MIT](https://img.shields.io/badge/license-MIT-blue)
+[![test](https://github.com/takuseno/miniature/actions/workflows/test.yaml/badge.svg)](https://github.com/takuseno/miniature/actions/workflows/test.yaml)
 
 A miniature is a toy deep learning library written in Rust.
 
