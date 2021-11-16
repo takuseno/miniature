@@ -48,7 +48,7 @@ fn main() {
     let fc3 = PF::linear(256, 10);
 
     // define optimizer
-    let mut optim = S::sgd(0.001);
+    let mut optim = S::adam(0.001, (0.9, 0.999), 1e-8);
     optim.set_params(fc1.get_params());
     optim.set_params(fc2.get_params());
     optim.set_params(fc3.get_params());
