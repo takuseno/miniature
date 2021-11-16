@@ -250,8 +250,13 @@ pub fn cross_entropy_loss(
 mod tests {
     use super::*;
     use crate::graph::backward;
-    use crate::test_utils::assert_eq_close;
     use rand::Rng;
+
+    fn assert_eq_close(x: f32, y: f32, atol: f32) {
+        if (x - y).abs() > atol {
+            panic!("abs({} - {}) = {}", x, y, (x - y).abs());
+        }
+    }
 
     #[test]
     fn add_variables() {

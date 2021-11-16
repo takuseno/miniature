@@ -49,6 +49,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let accuracy = (count as f32) / (test_size as f32);
             println!("Iteration {}: Accuracy={}", iter, accuracy);
         }
+
+        if iter == 100000 {
+            break;
+        }
     }
 
     Ok(())
