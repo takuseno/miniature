@@ -4,14 +4,14 @@ use std::rc::Rc;
 use crate::optimizer::OptimizerImpl;
 use crate::variable::Variable;
 
-pub struct SGD {
+pub struct Sgd {
     pub lr: f32,
 }
 
-impl OptimizerImpl for SGD {
-    fn update(&mut self, params: &Vec<Rc<RefCell<Variable>>>) {
-        for i in 0..params.len() {
-            let mut param = params[i].borrow_mut();
+impl OptimizerImpl for Sgd {
+    fn update(&mut self, params: &[Rc<RefCell<Variable>>]) {
+        for param in params {
+            let mut param = param.borrow_mut();
             for j in 0..param.size() as usize {
                 param.data[j] -= self.lr * param.grad[j];
             }

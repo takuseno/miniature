@@ -16,8 +16,8 @@ pub struct Variable {
 impl Variable {
     pub fn new(shape: Vec<u32>) -> Self {
         let mut size = 1;
-        for i in 0..shape.len() {
-            size *= shape[i];
+        for dim_size in &shape {
+            size *= dim_size;
         }
 
         let data = vec![0.0; size as usize];
@@ -25,9 +25,9 @@ impl Variable {
 
         Self {
             parent: None,
-            shape: shape,
-            data: data,
-            grad: grad,
+            shape,
+            data,
+            grad,
             need_grad: true,
         }
     }
@@ -47,8 +47,8 @@ impl Variable {
 
     pub fn size(&self) -> u32 {
         let mut size = 1;
-        for i in 0..self.shape.len() {
-            size *= self.shape[i];
+        for dim_size in &self.shape {
+            size *= dim_size;
         }
         size
     }

@@ -19,9 +19,9 @@ impl Linear {
         bias.borrow_mut().zeros();
 
         Self {
-            weight: weight,
-            bias: bias,
-            out_size: out_size,
+            weight,
+            bias,
+            out_size,
         }
     }
 

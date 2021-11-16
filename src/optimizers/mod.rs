@@ -3,7 +3,7 @@ mod sgd;
 use crate::optimizer::Optimizer;
 
 pub fn sgd(lr: f32) -> Box<Optimizer> {
-    let sgd_impl = Box::new(sgd::SGD { lr: lr });
+    let sgd_impl = Box::new(sgd::Sgd { lr });
     Box::new(Optimizer::new(sgd_impl))
 }
 

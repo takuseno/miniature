@@ -4,15 +4,11 @@ use std::rc::Rc;
 use crate::variable::Variable;
 
 pub trait FunctionImpl {
-    fn forward_impl(
-        &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
-    );
+    fn forward_impl(&mut self, inputs: &[Rc<RefCell<Variable>>], outputs: &[Rc<RefCell<Variable>>]);
     fn backward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     );
     fn get_name(&self) -> &str;
 }
@@ -37,9 +33,9 @@ impl CgFunction {
         function_impl: Box<dyn FunctionImpl>,
     ) -> Self {
         Self {
-            inputs: inputs,
-            outputs: outputs,
-            function_impl: function_impl,
+            inputs,
+            outputs,
+            function_impl,
         }
     }
 

@@ -29,8 +29,8 @@ pub fn backward(variable: Rc<RefCell<Variable>>) {
             }
             let borrowed_input = input.borrow();
             let parent = borrowed_input.parent.as_ref();
-            if parent.is_some() {
-                queue.push_back(parent.unwrap().clone());
+            if let Some(p) = parent {
+                queue.push_back(p.clone());
             }
         }
     }

@@ -8,11 +8,7 @@ use crate::variable::Variable;
 pub struct Mul {}
 
 impl Mul {
-    fn validate(
-        &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
-    ) {
+    fn validate(&mut self, inputs: &[Rc<RefCell<Variable>>], outputs: &[Rc<RefCell<Variable>>]) {
         assert_eq!(inputs.len(), 2);
         assert_eq!(outputs.len(), 1);
 
@@ -28,8 +24,8 @@ impl Mul {
 impl FunctionImpl for Mul {
     fn forward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
@@ -44,10 +40,10 @@ impl FunctionImpl for Mul {
 
     fn backward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
-        self.validate(&inputs, &outputs);
+        self.validate(inputs, outputs);
 
         let mut x = inputs[0].borrow_mut();
         let mut y = inputs[1].borrow_mut();

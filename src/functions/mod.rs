@@ -66,7 +66,7 @@ pub fn argmax(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
 
 pub fn broadcast(x: Rc<RefCell<Variable>>, shape: Vec<u32>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(shape.clone())));
-    let function = Box::new(Broadcast { shape: shape });
+    let function = Box::new(Broadcast { shape });
     let cg_function = Rc::new(RefCell::new(CgFunction::new(
         vec![x],
         vec![output.clone()],
@@ -174,9 +174,7 @@ pub fn neg(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
 pub fn onehot(x: Rc<RefCell<Variable>>, num_classes: u32) -> Rc<RefCell<Variable>> {
     let shape = vec![x.borrow().shape[0], num_classes];
     let output = Rc::new(RefCell::new(Variable::new(shape)));
-    let function = Box::new(Onehot {
-        num_classes: num_classes,
-    });
+    let function = Box::new(Onehot { num_classes });
     let cg_function = Rc::new(RefCell::new(CgFunction::new(
         vec![x],
         vec![output.clone()],

@@ -4,7 +4,7 @@ use std::rc::Rc;
 use crate::variable::Variable;
 
 pub trait OptimizerImpl {
-    fn update(&mut self, params: &Vec<Rc<RefCell<Variable>>>);
+    fn update(&mut self, params: &[Rc<RefCell<Variable>>]);
 }
 
 pub struct Optimizer {
@@ -16,7 +16,7 @@ impl Optimizer {
     pub fn new(optimizer_impl: Box<dyn OptimizerImpl>) -> Self {
         Self {
             params: vec![],
-            optimizer_impl: optimizer_impl,
+            optimizer_impl,
         }
     }
 

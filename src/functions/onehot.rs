@@ -10,11 +10,7 @@ pub struct Onehot {
 }
 
 impl Onehot {
-    fn validate(
-        &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
-    ) {
+    fn validate(&mut self, inputs: &[Rc<RefCell<Variable>>], outputs: &[Rc<RefCell<Variable>>]) {
         assert_eq!(inputs.len(), 1);
         assert_eq!(outputs.len(), 1);
 
@@ -32,8 +28,8 @@ impl Onehot {
 impl FunctionImpl for Onehot {
     fn forward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
@@ -45,15 +41,15 @@ impl FunctionImpl for Onehot {
         for i in 0..x.size() as usize {
             let offset = i * self.num_classes as usize;
             let label = x.data[i];
-            assert_eq!((label as u32) < self.num_classes, true);
+            assert!((label as u32) < self.num_classes);
             output.data[offset + label as usize] = 1.0;
         }
     }
 
     fn backward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        _inputs: &[Rc<RefCell<Variable>>],
+        _outputs: &[Rc<RefCell<Variable>>],
     ) {
         panic!("Onehot does not support backward.");
     }

@@ -8,11 +8,7 @@ use crate::variable::Variable;
 pub struct MatMul {}
 
 impl MatMul {
-    fn validate(
-        &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
-    ) {
+    fn validate(&mut self, inputs: &[Rc<RefCell<Variable>>], outputs: &[Rc<RefCell<Variable>>]) {
         assert_eq!(inputs.len(), 2);
         assert_eq!(outputs.len(), 1);
 
@@ -30,22 +26,16 @@ impl MatMul {
     }
 }
 
-fn transpose(x: &Vec<f32>, y: &mut Vec<f32>, shape: &Vec<u32>) {
-    for i in 0..x.len() as usize {
+fn transpose(x: &[f32], y: &mut [f32], shape: &[u32]) {
+    for (i, v) in x.iter().enumerate().take(x.len() as usize) {
         let orig_rows = i / shape[1] as usize;
         let orig_cols = i % shape[1] as usize;
         let transpose_index = shape[0] as usize * orig_cols + orig_rows;
-        y[transpose_index] = x[i];
+        y[transpose_index] = *v;
     }
 }
 
-fn matmul_impl(
-    x: &Vec<f32>,
-    x_shape: &Vec<u32>,
-    y: &Vec<f32>,
-    y_shape: &Vec<u32>,
-    output: &mut Vec<f32>,
-) {
+fn matmul_impl(x: &[f32], x_shape: &[u32], y: &[f32], y_shape: &[u32], output: &mut [f32]) {
     let x_rows = x_shape[0];
     let x_cols = x_shape[1];
     let y_cols = y_shape[1];
@@ -64,8 +54,8 @@ fn matmul_impl(
 impl FunctionImpl for MatMul {
     fn forward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
@@ -82,8 +72,8 @@ impl FunctionImpl for MatMul {
 
     fn backward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
@@ -99,7 +89,7 @@ impl FunctionImpl for MatMul {
             &output.grad,
             &output.shape,
             &transposed_y,
-            &vec![y.shape[1], y.shape[0]],
+            &[y.shape[1], y.shape[0]],
             &mut x.grad,
         );
 
@@ -109,7 +99,7 @@ impl FunctionImpl for MatMul {
         transpose(&x.data, &mut transposed_x, &x.shape);
         matmul_impl(
             &transposed_x,
-            &vec![x.shape[1], x.shape[0]],
+            &[x.shape[1], x.shape[0]],
             &output.grad,
             &output.shape,
             &mut y.grad,

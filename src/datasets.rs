@@ -6,7 +6,6 @@ use std::rc::Rc;
 
 use crate::variable::Variable;
 
-const MNIST_NUM_CLASSES: u32 = 10;
 const MNIST_IMAGE_SIZE: u32 = 28 * 28;
 const MNIST_TRAIN_IMAGE_FILE: &str = "mnist-train-images";
 const MNIST_TRAIN_LABEL_FILE: &str = "mnist-train-labels";
@@ -99,19 +98,19 @@ impl MNISTLoader {
         let test_images = load_mnist_image_file(test_image_path)?;
 
         println!("Loading test labels...");
-        let test_label_path = &(base_dir.clone() + "/" + MNIST_TEST_LABEL_FILE);
+        let test_label_path = &(base_dir + "/" + MNIST_TEST_LABEL_FILE);
         let test_labels = load_mnist_label_file(test_label_path)?;
 
         let train_size = train_images.len() as u32;
         let test_size = test_images.len() as u32;
 
         Ok(Self {
-            train_images: train_images,
-            train_labels: train_labels,
-            test_images: test_images,
-            test_labels: test_labels,
-            train_size: train_size,
-            test_size: test_size,
+            train_images,
+            train_labels,
+            test_images,
+            test_labels,
+            train_size,
+            test_size,
         })
     }
 
@@ -146,14 +145,19 @@ impl MNISTLoader {
         let mut images = vec![0.0; (self.test_size * MNIST_IMAGE_SIZE) as usize];
         let mut labels = vec![0.0; self.test_size as usize];
 
-        for i in 0..self.test_size as usize {
+        for (i, label) in self
+            .test_labels
+            .iter()
+            .enumerate()
+            .take(self.test_size as usize)
+        {
             // set image
             let image_start = MNIST_IMAGE_SIZE as usize * i;
             let image_end = image_start + MNIST_IMAGE_SIZE as usize;
             images[image_start..image_end].copy_from_slice(&self.test_images[i]);
 
             // set label
-            labels[i] = self.test_labels[i] as f32;
+            labels[i] = *label as f32;
         }
 
         let image_batch = Rc::new(RefCell::new(Variable::new(vec![

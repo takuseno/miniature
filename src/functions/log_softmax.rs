@@ -8,11 +8,7 @@ use crate::variable::Variable;
 pub struct LogSoftmax {}
 
 impl LogSoftmax {
-    fn validate(
-        &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
-    ) {
+    fn validate(&mut self, inputs: &[Rc<RefCell<Variable>>], outputs: &[Rc<RefCell<Variable>>]) {
         assert_eq!(inputs.len(), 1);
         assert_eq!(outputs.len(), 1);
 
@@ -28,8 +24,8 @@ impl LogSoftmax {
 impl FunctionImpl for LogSoftmax {
     fn forward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
@@ -59,8 +55,8 @@ impl FunctionImpl for LogSoftmax {
 
     fn backward_impl(
         &mut self,
-        inputs: &Vec<Rc<RefCell<Variable>>>,
-        outputs: &Vec<Rc<RefCell<Variable>>>,
+        inputs: &[Rc<RefCell<Variable>>],
+        outputs: &[Rc<RefCell<Variable>>],
     ) {
         self.validate(inputs, outputs);
 
