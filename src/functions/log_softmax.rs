@@ -33,21 +33,21 @@ impl FunctionImpl for LogSoftmax {
         let mut output = outputs[0].borrow_mut();
 
         // supports only 2-dim tensors
-        for i in 0..x.shape[0] as usize {
-            let offset = i * x.shape[1] as usize;
+        for i in 0..x.shape[0] {
+            let offset = i * x.shape[1];
             let mut sum = 0.0;
             let mut max = x.data[offset];
-            for j in 1..x.shape[1] as usize {
+            for j in 1..x.shape[1] {
                 max = if max > x.data[j + offset] {
                     max
                 } else {
                     x.data[j + offset]
                 };
             }
-            for j in 0..x.shape[1] as usize {
+            for j in 0..x.shape[1] {
                 sum += (x.data[j + offset] - max).exp();
             }
-            for j in 0..x.shape[1] as usize {
+            for j in 0..x.shape[1] {
                 output.data[j + offset] = x.data[j + offset] - max - sum.ln();
             }
         }
@@ -64,13 +64,13 @@ impl FunctionImpl for LogSoftmax {
         let output = outputs[0].borrow();
 
         // supports only 2-dim tensors
-        for i in 0..x.shape[0] as usize {
-            let offset = i * x.shape[1] as usize;
+        for i in 0..x.shape[0] {
+            let offset = i * x.shape[1];
             let mut sum = 0.0;
-            for j in 0..x.shape[1] as usize {
+            for j in 0..x.shape[1] {
                 sum += output.grad[j + offset];
             }
-            for j in 0..x.shape[1] as usize {
+            for j in 0..x.shape[1] {
                 let exp_output = output.data[j + offset].exp();
                 x.grad[j + offset] += output.grad[j + offset] - exp_output * sum;
             }

@@ -30,7 +30,7 @@ impl FunctionImpl for Neg {
         let x = inputs[0].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             output.data[i] = -x.data[i];
         }
     }
@@ -45,7 +45,7 @@ impl FunctionImpl for Neg {
         let mut x = inputs[0].borrow_mut();
         let output = outputs[0].borrow();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             x.grad[i] -= output.grad[i];
         }
     }

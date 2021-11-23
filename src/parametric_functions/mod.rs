@@ -1,6 +1,6 @@
 mod linear;
 
-pub fn linear(in_size: u32, out_size: u32) -> Box<linear::Linear> {
+pub fn linear(in_size: usize, out_size: usize) -> Box<linear::Linear> {
     Box::new(linear::Linear::new(in_size, out_size))
 }
 

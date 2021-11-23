@@ -7,14 +7,14 @@ use crate::function::CgFunction;
 #[derive(Debug)]
 pub struct Variable {
     pub parent: Option<Rc<RefCell<CgFunction>>>,
-    pub shape: Vec<u32>,
+    pub shape: Vec<usize>,
     pub data: Vec<f32>,
     pub grad: Vec<f32>,
     pub need_grad: bool,
 }
 
 impl Variable {
-    pub fn new(shape: Vec<u32>) -> Self {
+    pub fn new(shape: Vec<usize>) -> Self {
         let mut size = 1;
         for dim_size in &shape {
             size *= dim_size;
@@ -32,12 +32,12 @@ impl Variable {
         }
     }
 
-    pub fn rand(shape: Vec<u32>) -> Self {
+    pub fn rand(shape: Vec<usize>) -> Self {
         let mut variable = Self::new(shape);
 
         // randomly initialize weight
         let mut rng = rand::thread_rng();
-        for i in 0..variable.size() as usize {
+        for i in 0..variable.size() {
             variable.data[i] = rng.gen();
             variable.data[i] -= 0.5;
         }
@@ -45,7 +45,7 @@ impl Variable {
         variable
     }
 
-    pub fn size(&self) -> u32 {
+    pub fn size(&self) -> usize {
         let mut size = 1;
         for dim_size in &self.shape {
             size *= dim_size;
@@ -54,12 +54,12 @@ impl Variable {
     }
 
     pub fn set_data(&mut self, data: &[f32]) {
-        assert_eq!(self.size() as usize, data.len());
+        assert_eq!(self.size(), data.len());
         self.data.copy_from_slice(data);
     }
 
     pub fn set_grad(&mut self, grad: &[f32]) {
-        assert_eq!(self.size() as usize, grad.len());
+        assert_eq!(self.size(), grad.len());
         self.grad.copy_from_slice(grad);
     }
 

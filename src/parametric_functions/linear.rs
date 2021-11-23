@@ -7,11 +7,11 @@ use crate::variable::Variable;
 pub struct Linear {
     weight: Rc<RefCell<Variable>>,
     bias: Rc<RefCell<Variable>>,
-    out_size: u32,
+    out_size: usize,
 }
 
 impl Linear {
-    pub fn new(in_size: u32, out_size: u32) -> Self {
+    pub fn new(in_size: usize, out_size: usize) -> Self {
         let weight = Rc::new(RefCell::new(Variable::rand(vec![in_size, out_size])));
         let bias = Rc::new(RefCell::new(Variable::new(vec![1, out_size])));
 

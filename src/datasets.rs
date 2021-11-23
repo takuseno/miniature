@@ -6,7 +6,7 @@ use std::rc::Rc;
 
 use crate::variable::Variable;
 
-const MNIST_IMAGE_SIZE: u32 = 28 * 28;
+const MNIST_IMAGE_SIZE: usize = 28 * 28;
 const MNIST_TRAIN_IMAGE_FILE: &str = "mnist-train-images";
 const MNIST_TRAIN_LABEL_FILE: &str = "mnist-train-labels";
 const MNIST_TEST_IMAGE_FILE: &str = "mnist-test-images";
@@ -77,8 +77,8 @@ pub struct MNISTLoader {
     train_labels: Vec<i32>,
     test_images: Vec<Vec<f32>>,
     test_labels: Vec<i32>,
-    train_size: u32,
-    test_size: u32,
+    train_size: usize,
+    test_size: usize,
 }
 
 impl MNISTLoader {
@@ -101,8 +101,8 @@ impl MNISTLoader {
         let test_label_path = &(base_dir + "/" + MNIST_TEST_LABEL_FILE);
         let test_labels = load_mnist_label_file(test_label_path)?;
 
-        let train_size = train_images.len() as u32;
-        let test_size = test_images.len() as u32;
+        let train_size = train_images.len();
+        let test_size = test_images.len();
 
         Ok(Self {
             train_images,
@@ -114,17 +114,17 @@ impl MNISTLoader {
         })
     }
 
-    pub fn sample(&self, batch_size: u32) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
-        let mut images = vec![0.0; (batch_size * MNIST_IMAGE_SIZE) as usize];
-        let mut labels = vec![0.0; batch_size as usize];
+    pub fn sample(&self, batch_size: usize) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
+        let mut images = vec![0.0; batch_size * MNIST_IMAGE_SIZE];
+        let mut labels = vec![0.0; batch_size];
 
         let mut rng = rand::thread_rng();
-        for i in 0..batch_size as usize {
+        for i in 0..batch_size {
             let index = rng.gen_range(0, self.train_size) as usize;
 
             // set image
-            let image_start = MNIST_IMAGE_SIZE as usize * i;
-            let image_end = image_start + MNIST_IMAGE_SIZE as usize;
+            let image_start = MNIST_IMAGE_SIZE * i;
+            let image_end = image_start + MNIST_IMAGE_SIZE;
             images[image_start..image_end].copy_from_slice(&self.train_images[index]);
 
             // set label
@@ -142,18 +142,13 @@ impl MNISTLoader {
     }
 
     pub fn get_test_data(&self) -> (Rc<RefCell<Variable>>, Rc<RefCell<Variable>>) {
-        let mut images = vec![0.0; (self.test_size * MNIST_IMAGE_SIZE) as usize];
-        let mut labels = vec![0.0; self.test_size as usize];
+        let mut images = vec![0.0; self.test_size * MNIST_IMAGE_SIZE];
+        let mut labels = vec![0.0; self.test_size];
 
-        for (i, label) in self
-            .test_labels
-            .iter()
-            .enumerate()
-            .take(self.test_size as usize)
-        {
+        for (i, label) in self.test_labels.iter().enumerate().take(self.test_size) {
             // set image
-            let image_start = MNIST_IMAGE_SIZE as usize * i;
-            let image_end = image_start + MNIST_IMAGE_SIZE as usize;
+            let image_start = MNIST_IMAGE_SIZE * i;
+            let image_end = image_start + MNIST_IMAGE_SIZE;
             images[image_start..image_end].copy_from_slice(&self.test_images[i]);
 
             // set label

@@ -29,7 +29,7 @@ impl FunctionImpl for Mean {
         let mut output = outputs[0].borrow_mut();
 
         let mut sum = 0.0;
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             sum += x.data[i];
         }
         output.data[0] = sum / x.size() as f32;
@@ -46,7 +46,7 @@ impl FunctionImpl for Mean {
         let output = outputs[0].borrow();
 
         let total_size = x.size();
-        for i in 0..total_size as usize {
+        for i in 0..total_size {
             x.grad[i] += output.grad[0] / total_size as f32;
         }
     }

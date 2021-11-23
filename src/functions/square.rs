@@ -30,7 +30,7 @@ impl FunctionImpl for Square {
         let x = inputs[0].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             output.data[i] = x.data[i] * x.data[i];
         }
     }
@@ -45,7 +45,7 @@ impl FunctionImpl for Square {
         let mut x = inputs[0].borrow_mut();
         let output = outputs[0].borrow();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             x.grad[i] += 2.0 * x.data[i] * output.grad[i];
         }
     }

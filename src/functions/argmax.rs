@@ -33,11 +33,11 @@ impl FunctionImpl for Argmax {
         let x = inputs[0].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.shape[0] as usize {
-            let offset = i * x.shape[1] as usize;
+        for i in 0..x.shape[0] {
+            let offset = i * x.shape[1];
             let mut max = x.data[offset];
             let mut max_index = 0.0;
-            for j in 1..x.shape[1] as usize {
+            for j in 1..x.shape[1] {
                 if x.data[j + offset] > max {
                     max = x.data[j + offset];
                     max_index = j as f32;

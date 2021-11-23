@@ -21,7 +21,7 @@ impl Onehot {
         assert_eq!(x.shape.len(), 1);
         assert_eq!(output.shape.len(), 2);
         assert_eq!(output.shape[0], x.shape[0]);
-        assert_eq!(output.shape[1], self.num_classes);
+        assert_eq!(output.shape[1] as u32, self.num_classes);
     }
 }
 
@@ -38,7 +38,7 @@ impl FunctionImpl for Onehot {
 
         output.zeros();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             let offset = i * self.num_classes as usize;
             let label = x.data[i];
             assert!((label as u32) < self.num_classes);

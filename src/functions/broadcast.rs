@@ -6,7 +6,7 @@ use crate::variable::Variable;
 
 #[derive(Debug)]
 pub struct Broadcast {
-    pub shape: Vec<u32>,
+    pub shape: Vec<usize>,
 }
 
 impl Broadcast {
@@ -19,7 +19,7 @@ impl Broadcast {
 
         assert_eq!(x.shape.len(), self.shape.len());
         assert_eq!(output.shape, self.shape);
-        for i in 0..x.shape.len() as usize {
+        for i in 0..x.shape.len() {
             if x.shape[i] != 1 {
                 assert_eq!(x.shape[i], self.shape[i]);
             } else {
@@ -42,8 +42,8 @@ impl FunctionImpl for Broadcast {
 
         // supports only batch dimension
         for i in 0..output.shape[0] {
-            let offset = (i * x.size()) as usize;
-            for j in 0..x.size() as usize {
+            let offset = i * x.size();
+            for j in 0..x.size() {
                 output.data[j + offset] = x.data[j];
             }
         }
@@ -60,9 +60,9 @@ impl FunctionImpl for Broadcast {
         let output = outputs[0].borrow();
 
         // supports only batch dimension
-        for i in 0..x.size() as usize {
-            for j in 0..output.shape[0] as usize {
-                let offset = j * x.size() as usize;
+        for i in 0..x.size() {
+            for j in 0..output.shape[0] {
+                let offset = j * x.size();
                 x.grad[i] += output.grad[i + offset];
             }
         }

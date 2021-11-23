@@ -64,7 +64,7 @@ pub fn argmax(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
     output
 }
 
-pub fn broadcast(x: Rc<RefCell<Variable>>, shape: Vec<u32>) -> Rc<RefCell<Variable>> {
+pub fn broadcast(x: Rc<RefCell<Variable>>, shape: Vec<usize>) -> Rc<RefCell<Variable>> {
     let output = Rc::new(RefCell::new(Variable::new(shape.clone())));
     let function = Box::new(Broadcast { shape });
     let cg_function = Rc::new(RefCell::new(CgFunction::new(
@@ -172,7 +172,7 @@ pub fn neg(x: Rc<RefCell<Variable>>) -> Rc<RefCell<Variable>> {
 }
 
 pub fn onehot(x: Rc<RefCell<Variable>>, num_classes: u32) -> Rc<RefCell<Variable>> {
-    let shape = vec![x.borrow().shape[0], num_classes];
+    let shape = vec![x.borrow().shape[0], num_classes as usize];
     let output = Rc::new(RefCell::new(Variable::new(shape)));
     let function = Box::new(Onehot { num_classes });
     let cg_function = Rc::new(RefCell::new(CgFunction::new(
@@ -268,7 +268,7 @@ mod tests {
         let x_data = &x.borrow().data;
         let y_data = &y.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(x_data[i] + y_data[i], output_data[i]);
         }
     }
@@ -282,11 +282,11 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().shape[0] as usize {
-            let offset = i * x.borrow().shape[1] as usize;
+        for i in 0..x.borrow().shape[0] {
+            let offset = i * x.borrow().shape[1];
             let mut max = x_data[offset];
             let mut max_index = 0;
-            for j in 1..x.borrow().shape[1] as usize {
+            for j in 1..x.borrow().shape[1] {
                 if x_data[j + offset] > max {
                     max = x_data[j + offset];
                     max_index = j;
@@ -304,9 +304,9 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..output.borrow().shape[0] as usize {
-            let offset = i * x.borrow().size() as usize;
-            for j in 0..x.borrow().size() as usize {
+        for i in 0..output.borrow().shape[0] {
+            let offset = i * x.borrow().size();
+            for j in 0..x.borrow().size() {
                 assert_eq!(output_data[j + offset], x_data[j]);
             }
         }
@@ -322,7 +322,7 @@ mod tests {
         let x_data = &x.borrow().data;
         let y_data = &y.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(output_data[i], x_data[i] / y_data[i]);
         }
     }
@@ -331,7 +331,7 @@ mod tests {
     fn log_variables() {
         let x = Rc::new(RefCell::new(Variable::rand(vec![1, 2, 3])));
         let size = x.borrow().size();
-        for i in 0..size as usize {
+        for i in 0..size {
             x.borrow_mut().data[i] += 1.0; // to prevent log(0)
         }
         let output = log(x.clone());
@@ -339,7 +339,7 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(output_data[i], x_data[i].ln());
         }
     }
@@ -353,7 +353,7 @@ mod tests {
         let test_output = log(softmax(x.clone()));
         let output_data = &output.borrow().data;
         let test_output_data = &test_output.borrow().data;
-        for i in 0..output.borrow().size() as usize {
+        for i in 0..output.borrow().size() {
             assert_eq_close(output_data[i], test_output_data[i], 0.001);
         }
     }
@@ -389,7 +389,7 @@ mod tests {
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
         let mut sum = 0.0;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             sum += x_data[i];
         }
         assert_eq!(output_data[0], sum / x.borrow().size() as f32);
@@ -405,7 +405,7 @@ mod tests {
         let x_data = &x.borrow().data;
         let y_data = &y.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(output_data[i], x_data[i] * y_data[i]);
         }
     }
@@ -418,7 +418,7 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(output_data[i], -x_data[i]);
         }
     }
@@ -428,7 +428,7 @@ mod tests {
         let x = Rc::new(RefCell::new(Variable::new(vec![10])));
         let mut rng = rand::thread_rng();
         let size = x.borrow().size();
-        for i in 0..size as usize {
+        for i in 0..size {
             x.borrow_mut().data[i] = rng.gen_range(0, 20) as f32;
         }
         let output = onehot(x.clone(), 20);
@@ -437,7 +437,7 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             let offset = i * 20;
             for j in 0..20 as usize {
                 if x_data[i] == j as f32 {
@@ -457,7 +457,7 @@ mod tests {
 
         let x_data = &x.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             if x_data[i] > 0.0 {
                 assert_eq!(output_data[i], x_data[i]);
             } else {
@@ -470,10 +470,10 @@ mod tests {
     fn softmax_variables() {
         let x = Rc::new(RefCell::new(Variable::rand(vec![2, 10])));
         let output = softmax(x);
-        for i in 0..output.borrow().shape[0] as usize {
-            let offset = i * output.borrow().shape[1] as usize;
+        for i in 0..output.borrow().shape[0] {
+            let offset = i * output.borrow().shape[1];
             let mut sum = 0.0;
-            for j in 0..output.borrow().shape[1] as usize {
+            for j in 0..output.borrow().shape[1] {
                 sum += output.borrow().data[j + offset];
             }
             assert_eq_close(sum, 1.0, 0.01);
@@ -491,7 +491,7 @@ mod tests {
         let x_data = &x.borrow().data;
         let y_data = &y.borrow().data;
         let output_data = &output.borrow().data;
-        for i in 0..x.borrow().size() as usize {
+        for i in 0..x.borrow().size() {
             assert_eq!(output_data[i], x_data[i] - y_data[i]);
         }
     }

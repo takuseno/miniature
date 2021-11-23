@@ -26,25 +26,25 @@ impl MatMul {
     }
 }
 
-fn transpose(x: &[f32], y: &mut [f32], shape: &[u32]) {
-    for (i, v) in x.iter().enumerate().take(x.len() as usize) {
-        let orig_rows = i / shape[1] as usize;
-        let orig_cols = i % shape[1] as usize;
-        let transpose_index = shape[0] as usize * orig_cols + orig_rows;
+fn transpose(x: &[f32], y: &mut [f32], shape: &[usize]) {
+    for (i, v) in x.iter().enumerate().take(x.len()) {
+        let orig_rows = i / shape[1];
+        let orig_cols = i % shape[1];
+        let transpose_index = shape[0] * orig_cols + orig_rows;
         y[transpose_index] = *v;
     }
 }
 
-fn matmul_impl(x: &[f32], x_shape: &[u32], y: &[f32], y_shape: &[u32], output: &mut [f32]) {
+fn matmul_impl(x: &[f32], x_shape: &[usize], y: &[f32], y_shape: &[usize], output: &mut [f32]) {
     let x_rows = x_shape[0];
     let x_cols = x_shape[1];
     let y_cols = y_shape[1];
-    for i in 0..x_rows as usize {
-        for j in 0..y_cols as usize {
-            let out_index = i * (y_cols as usize) + j;
-            for k in 0..x_cols as usize {
-                let x_index = i * (x_cols as usize) + k;
-                let y_index = k * (y_cols as usize) + j;
+    for i in 0..x_rows {
+        for j in 0..y_cols {
+            let out_index = i * y_cols + j;
+            for k in 0..x_cols {
+                let x_index = i * (x_cols) + k;
+                let y_index = k * (y_cols) + j;
                 output[out_index] += x[x_index] * y[y_index];
             }
         }

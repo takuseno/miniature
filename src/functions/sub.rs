@@ -33,7 +33,7 @@ impl FunctionImpl for Sub {
         let y = inputs[1].borrow();
         let mut output = outputs[0].borrow_mut();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             output.data[i] = x.data[i] - y.data[i];
         }
     }
@@ -49,7 +49,7 @@ impl FunctionImpl for Sub {
         let mut y = inputs[1].borrow_mut();
         let output = outputs[0].borrow();
 
-        for i in 0..x.size() as usize {
+        for i in 0..x.size() {
             x.grad[i] += output.grad[i];
             y.grad[i] -= output.grad[i];
         }
